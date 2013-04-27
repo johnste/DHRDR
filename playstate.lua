@@ -1,4 +1,5 @@
-M = {}
+M = {
+}
 
 function M:new(data)
 	local o = {}
@@ -11,19 +12,24 @@ function M:new(data)
 		end		
 	end	
 	
-	o.world = love.physics.newWorld(0, 50)
-	o.world:setCallbacks(o.collisionStart, o.collisionStop)
-	o.cam = camera:new{
-	}
-
+	world = love.physics.newWorld(0, 500)
+	love.physics.setMeter(100)
+	world:setCallbacks(o.collisionStart, o.collisionStop)	
+	o.cam = camera:new{}	
+	o.level = level:new{file = "level1", camera = o.cam}
 	return o
 end
 
-function M:update(dt)
+function M:update(dt)	
+	world:update(dt)
 end
 
 function M:draw()
+	self.cam:set()
+	self.level:draw()
+	self.cam:unset()
 end
+
 
 function M.collisionStart(fixture1, fixture2, contact)
 	local userData1, userData2 = fixture1:getUserData(), fixture2:getUserData()
