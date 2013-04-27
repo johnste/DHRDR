@@ -24,7 +24,6 @@ function M:new(data)
 	
 	o.shape = love.physics.newRectangleShape(o.x, o.y, o.width, o.height, o.angle)
 	love.physics.newFixture(M.ground, o.shape)
-	
 	return o
 end
 

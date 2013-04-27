@@ -20,7 +20,13 @@ function M:new(data)
 	
 	for k, f in pairs(o.fixtures) do
 		f.x, f.y = f.x or 0, f.y or 0
-		f.shapeDef = love.physics.newRectangleShape(f.x, f.y, f.width, f.height)
+		
+		if f.shape == "circle" then
+			f.shapeDef = love.physics.newCircleShape(f.x, f.y, f.radius)
+		else
+			f.shapeDef = love.physics.newRectangleShape(f.x, f.y, f.width, f.height)
+		end
+		
 		f.fixture = love.physics.newFixture(o.body, f.shapeDef)
 		f.fixture:setDensity(f.density or o.density or 1)
 		f.fixture:setFriction(f.friction or o.friction or 1)
@@ -46,12 +52,22 @@ function M:draw()
 	love.graphics.translate(self.body:getX(), self.body:getY())	
 	love.graphics.rotate(self.body:getAngle())
 	for n, f in pairs(self.fixtures) do
-		
-		if f.image and type(f.image) == "userdata" then			
-			love.graphics.draw(f.image, -f.width/2 + f.x, -f.height/2 + f.y, 0, f.width/f.image:getWidth(), f.height/f.image:getHeight())
+		if f.shape == "circle" then
+			if f.image and type(f.image) == "userdata" then			
+				love.graphics.draw(f.image, -f.radius + f.x, -f.radius + f.y, 0, 2*f.radius/f.image:getWidth(),2*f.radius/f.image:getHeight())			
+			else
+				love.graphics.circle("line", f.x, f.y, f.radius)	
+				love.graphics.line( f.x - f.radius, f.y, f.x + f.radius, f.y)
+			end
+				
 		else
-			love.graphics.rectangle("line", -f.width/2 + f.x, -f.height/2 + f.y, f.width, f.height)			
+			if f.image and type(f.image) == "userdata" then			
+				love.graphics.draw(f.image, -f.width/2 + f.x, -f.height/2 + f.y, 0, f.width/f.image:getWidth(), f.height/f.image:getHeight())
+			else
+				love.graphics.rectangle("line", -f.width/2 + f.x, -f.height/2 + f.y, f.width, f.height)			
+			end
 		end
+		
 	end
 	love.graphics.pop()
 end

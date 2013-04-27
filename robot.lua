@@ -25,13 +25,39 @@ function M:new(data)
 		}
 	}
 	
+	o.wheel1 = body:new{
+		owner = o, x = o.x - 15, y = o.y + 8,
+		fixtures = {
+			{shape = "circle", radius = 10, image = "robotwheel"}
+		}
+	}
 	
+	o.wheel2 = body:new{
+		owner = o, x = o.x + 15, y = o.y + 8,
+		fixtures = {
+			{shape = "circle", radius = 10, image = "robotwheel"}
+		}
+	}
+	
+	o.joint = joint:new{		
+		bodies = {o.body, o.wheel1},
+		x = o.x - 15, y = o.y + 8,
+		torque = 2000,	motor = true, 
+	}
+	
+	o.joint = joint:new{
+		bodies = {o.body, o.wheel2},
+		x = o.x + 15, y = o.y + 8,
+		torque = 2000,	motor = true, 	
+	}
 	
 	return o
 end
 
 function M:draw()
 	self.body:draw()
+	self.wheel1:draw()
+	self.wheel2:draw()
 end
 
 function M:collide(myFixture, theirFixture, contact)

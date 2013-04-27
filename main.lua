@@ -9,7 +9,9 @@ files = {
 	static = "static.lua",
 	camera = "camera.lua",	
 	level = "level.lua",
+	joint = "joint.lua",
 	"main.lua",	
+	"utils.lua",
 }
 
 local levelFiles = love.filesystem.enumerate("level")
@@ -66,10 +68,12 @@ function love.update(dt)
 end
 
 function love.draw()
+	love.graphics.setPixelEffect(robotVisionShader)
 	currentState:draw()
+	love.graphics.setPixelEffect(nil)
 end
 
-function love.keypressed(key)
+function love.keypressed(key, unicode)
 	if (key == "escape" or key == "f4") then
         love.event.quit()
     end
@@ -82,5 +86,19 @@ function love.keypressed(key)
 		end
 		love.load()
 	end
+	
+	currentState:keypressed(key, unicode)
+end
+
+function love.keyreleased(key, unicode)
+	currentState:keyreleased(key, unicode)
+end
+
+function love.mousepressed(x, y, button)
+	currentState:mousepressed(x, y, button)
+end
+
+function love.mousereleased(x, y, button)
+	currentState:mousereleased(x, y, button)
 end
 

@@ -17,6 +17,7 @@ function M:new(data)
 	world:setCallbacks(o.collisionStart, o.collisionStop)	
 	o.cam = camera:new{}	
 	o.level = level:new{file = "level1", camera = o.cam}
+	o.player = o.level:getPlayer()
 	return o
 end
 
@@ -30,6 +31,17 @@ function M:draw()
 	self.cam:unset()
 end
 
+function M:keypressed(key, unicode)
+end
+
+function M:keyreleased(key, unicode)
+end
+
+function M:mousepressed(key, unicode)
+end
+
+function M:mousereleased(key, unicode)
+end
 
 function M.collisionStart(fixture1, fixture2, contact)
 	local userData1, userData2 = fixture1:getUserData(), fixture2:getUserData()

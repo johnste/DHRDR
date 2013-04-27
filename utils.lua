@@ -43,3 +43,26 @@ function mirror(body)
 	
 	return newBody
 end
+
+robotVisionShader=love.graphics.newPixelEffect[[
+
+	
+    vec4 effect(vec4 color, sampler2D tex, vec2 st, vec2 pixel_coords) {
+      float pi = 3.14159216;
+	  vec2 orig = vec2((st.x - 0.5)*4, (st.y - 0.5)*2);
+      float dist = length(orig);
+	
+ 
+	  vec4 tex2 = Texel(tex, vec2(			
+		  st.x,
+		  st.y  
+	  ));
+  
+      float r = tex2.r;
+      float g = tex2.g;
+      float b = tex2.b;	  
+      float a = tex2.a;	  
+
+      return vec4(r,g,b,a);
+    }
+]]

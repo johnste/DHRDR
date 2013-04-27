@@ -54,6 +54,7 @@ function M:draw()
 	self.player:draw()
 end
 
+-- Objects!
 M.obj = {}
 M.obj.milk = {groundOffset = 10, fixtures = {{ density = 1, width = 10, height = 20, image = "milk" }}}
 M.obj.chair = {groundOffset = 50, fixtures = {

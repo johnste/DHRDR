@@ -1,8 +1,9 @@
 
 local level = {
 	walls =  {
-		{width = 400, height = 10, y = 5, image = "wall" },
+		{width = 200, height = 10, x = -480, y = 44, angle = 0, image = "wall"},
 		{width = 200, height = 10, x = -290, y = 24, angle = math.tau*7.5/16, image = "wall"},
+		{width = 400, height = 10, y = 5, image = "wall" },
 		{width = 200, height = 10, x = -200, y = -250, angle = math.tau/4, image = "wall"},
 		{width = 30, height = 10, x = 195, y = -10, angle = math.tau/4, image = "wall"},
 		{width = 30, height = 10, x = 205, y = -20, angle = math.tau, image = "wall"},
