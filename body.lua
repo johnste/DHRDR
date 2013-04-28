@@ -16,22 +16,42 @@ function M:new(data)
 		end		
 	end	
 	
+	if o.scale then
+		o.x = o.x * o.scale
+		o.y = o.y * o.scale		
+		o.groundOffset = o.groundOffset and o.groundOffset * o.scale
+	end
+	
 	o.body = love.physics.newBody(world, o.x, o.y - (o.groundOffset or 0), "dynamic")
 	
 	for k, f in pairs(o.fixtures) do
 		f.x, f.y = f.x or 0, f.y or 0
 		
+		if o.scale then
+			f.x = f.x * o.scale
+			f.y = f.y * o.scale
+			f.width = f.width and f.width * o.scale
+			f.height = f.height and f.height * o.scale
+			f.radius = f.radius and f.radius * o.scale			
+		end
+	
 		if f.shape == "circle" then
 			f.shapeDef = love.physics.newCircleShape(f.x, f.y, f.radius)
 		else
-			f.shapeDef = love.physics.newRectangleShape(f.x, f.y, f.width, f.height)
+			f.shapeDef = love.physics.newRectangleShape(f.x, f.y, f.width, f.height)			
 		end
 		
 		f.fixture = love.physics.newFixture(o.body, f.shapeDef)
 		f.fixture:setDensity(f.density or o.density or 1)
 		f.fixture:setFriction(f.friction or o.friction or 1)
 		f.fixture:setRestitution(f.restitution or o.restitution or 0)
-		f.fixture:setUserData(o.owner)					
+		f.fixture:setUserData(o.owner or o)		
+		if (f.group) then
+			for n, g in ipairs(f.group) do
+				f.fixture:setGroupIndex(g)
+			end
+		end
+		
 		if f.image then				
 			if images[f.image] and type(f.image) == "string" then
 				f.image = images[f.image]
@@ -62,9 +82,11 @@ function M:draw()
 				
 		else
 			if f.image and type(f.image) == "userdata" then			
-				love.graphics.draw(f.image, -f.width/2 + f.x, -f.height/2 + f.y, 0, f.width/f.image:getWidth(), f.height/f.image:getHeight())
+				love.graphics.draw(f.image, -f.width/2 + f.x, -f.height/2 + f.y, 0, f.width/f.image:getWidth(), f.height/f.image:getHeight())			
 			else
+				love.graphics.setColor(0,0,255,255)
 				love.graphics.rectangle("line", -f.width/2 + f.x, -f.height/2 + f.y, f.width, f.height)			
+				love.graphics.setColor(255,255,255,255)
 			end
 		end
 		
@@ -72,5 +94,9 @@ function M:draw()
 	love.graphics.pop()
 end
 	
+function M:collide(active, myFixture, theirFixture, contact, theirOwner)
+	
+end
+
 
 return M

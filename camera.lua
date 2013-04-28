@@ -4,7 +4,7 @@ M = {
 	y = 0,
 	offset = { 
 		x = love.graphics.getWidth()/2,
-		y = love.graphics.getHeight()/2,
+		y = love.graphics.getHeight()/2 + 100,
 	}
 }
 
@@ -41,5 +41,10 @@ end
 function M:follow(obj)
 	self.target = obj
 end
+
+function M:mousePosition(x, y)
+	return x - self.x - self.offset.x, y - self.y - self.offset.y
+end
+
 
 return M

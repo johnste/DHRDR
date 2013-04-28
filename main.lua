@@ -1,4 +1,4 @@
-dofile("utils.lua")
+love.filesystem.load("utils.lua")()
 
 files = {
 	body = "body.lua", 
@@ -16,7 +16,9 @@ files = {
 
 local levelFiles = love.filesystem.enumerate("level")
 for k, file in ipairs(levelFiles) do
-	table.insert(files, "level/" .. file)
+	if string.find(file, ".lua") then
+		table.insert(files, "level/" .. file)
+	end
 end
 
 
@@ -26,7 +28,7 @@ currentState = nil
 
 for n, f in pairs(files) do	
 	if (n ~= tonumber(n)) then
-		rawset(_G, n, dofile(f))
+		rawset(_G, n, love.filesystem.load(f)())
 	end
 end
 
@@ -44,9 +46,23 @@ function love.load()
 		images[string.sub(file, 0, string.find(file, "%.") - 1)] = love.graphics.newImage("image/" .. file)				
 	end
 	
-	states.play = playstate:new()
+	-- Load all sounds
+	sounds = {}	
+	files = love.filesystem.enumerate("sound")
+	for k, file in ipairs(files) do
+		sounds[string.sub(file, 0, string.find(file, "%.") - 1)] = love.audio.newSource("sound/" .. file, "static")				
+	end
+	sounds.engine:setLooping(true)
+	sounds.engine:setVolume(0.5)
 	
-	currentState = states.play
+	sounds.music:setLooping(true)
+	sounds.music:setVolume(0.2)
+	
+	
+	states.menu = menustate:new()
+	
+	currentState = states.menu
+	
 	--states.menu = menustate:new()
 end
 
@@ -67,10 +83,9 @@ function love.update(dt)
 	currentState:update(dt)
 end
 
-function love.draw()
-	love.graphics.setPixelEffect(robotVisionShader)
-	currentState:draw()
-	love.graphics.setPixelEffect(nil)
+function love.draw()	
+	currentState:draw()	
+	
 end
 
 function love.keypressed(key, unicode)
@@ -78,6 +93,7 @@ function love.keypressed(key, unicode)
         love.event.quit()
     end
 	
+	--[[
 	if key == "r" then
 		print(":> Force reload of all source files")
 		io.flush()
@@ -86,6 +102,7 @@ function love.keypressed(key, unicode)
 		end
 		love.load()
 	end
+	--]]
 	
 	currentState:keypressed(key, unicode)
 end
