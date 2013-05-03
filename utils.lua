@@ -1,57 +1,18 @@
 math.tau = math.pi * 2
 
-function prefab(body, def)
-	local newBody = {}
-	--[[ 
-	for k, v in ipairs(def) do
-		for n, w in pairs(v) do
-			body.fixtures[k][n] = w
-		end
-	end	
-	--]]
-	
-	for k, v in pairs(body) do
-		newBody[k] = v
-	end
-	
-	for k, v in pairs(def) do
-		newBody[k] = v
-	end
-	
-	newBody.fixtures = {}		
-	for k, v in ipairs(body.fixtures) do
-		
-		newBody.fixtures[k] = {}
-		for n, f in pairs(v) do
-			newBody.fixtures[k][n] = f
-		end		
-	
-	end
-	
-	return newBody
-end
-
-function mirror(body)
-	local newBody = {}	
-	
-	for k, v in pairs(body) do
-		newBody[k] = v
-	end
-	
-	newBody.fixtures = {}		
-	for k, v in ipairs(body.fixtures) do
-		
-		newBody.fixtures[k] = {}
-		for n, f in pairs(v) do
-			newBody.fixtures[k][n] = f
-		end		
-		
-		if newBody.fixtures[k].x then
-			newBody.fixtures[k].x = -newBody.fixtures[k].x
-		end
-	end
-	
-	return newBody
+function deepcopy(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+        end
+        setmetatable(copy, deepcopy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
 end
 
 robotVisionShader=love.graphics.newPixelEffect[[
@@ -62,15 +23,42 @@ robotVisionShader=love.graphics.newPixelEffect[[
 	  float y = 240;
 	  vec2 orig = vec2(pixel_coords.x - x, pixel_coords.y - y);
       float dist = length(orig);
-	  vec4 tex2 = Texel(tex, st);
-      float r = tex2.r;
+	  vec2 t = vec2(st.x, st.y);
+	  
+	  vec4 tex2 = Texel(tex, t);
+      float a = tex2.a;
+      float g = tex2.g * dist*dist/80000;  
+      float b = tex2.b * dist*dist/80000;  
+	  float r = tex2.r * dist*dist/80000;  
+	  
+      return vec4(r,g,b,a);
+    }
+]]
+
+
+clutterBarShader=love.graphics.newPixelEffect[[
+	extern number ratio;
+	
+    vec4 effect(vec4 color, sampler2D tex, vec2 st, vec2 pixel_coords) {
+      float pi = 3.14159216;
+	  float x = 450;
+	  float y = 240;
+	 
+
+	  vec4 tex2 = Texel(tex, st);	 
+      float a = tex2.a;
+	  
+	  if (st.x > ratio){
+		a = 0;  
+	  }
+	 
       float g = tex2.g;
       float b = tex2.b;		
-	  float a = tex2.a * dist*dist/7000;  
-	  if (dist*dist >= 7000) 
-		a = tex2.a ;  
+	  float r = tex2.r;  
+ 
 	  
       
       return vec4(r,g,b,a);
     }
 ]]
+

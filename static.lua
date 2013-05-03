@@ -2,9 +2,10 @@ M = {
 	x = 0,
 	y = 0,
 	width = 200,
-	height = 10,
+	height = 30,
 	angle = 0,
 	image = nil,
+	world = nil,
 }
 
 function M:new(data)
@@ -19,7 +20,7 @@ function M:new(data)
 	end	
 
 	
-	ground = love.physics.newBody(world, 0, 0, "static")
+	o.body = love.physics.newBody(o.world, 0, 0, "static")
 	
 	
 	if o.scale then
@@ -30,9 +31,9 @@ function M:new(data)
 	end
 	
 	o.shape = love.physics.newRectangleShape(o.x, o.y, o.width, o.height, o.angle)
-	o.fixture = love.physics.newFixture(ground, o.shape)
+	o.fixture = love.physics.newFixture(o.body, o.shape)
 	o.fixture:setSensor(o.sensor or false)
-	o.fixture:setUserData(o.owner)
+	--o.fixture:setUserData(o.owner)		
 	
 	return o
 end
@@ -41,16 +42,23 @@ function M:getGround()
 	return ground
 end
 
+function M:destroy()
+	self.body:destroy()
+	self.body = nil
+end
+
 function M:draw()
 
 	if not self.image then
-		if (self.sensor) then
-			love.graphics.setColor(0,155,155,255)
+		--[[if (self.sensor) then
+			love.graphics.setColor(0,155,155,50)
+			love.graphics.polygon("line", self.shape:getPoints())	
 		else
 			love.graphics.setColor(0,255,0,255)
+			love.graphics.polygon("line", self.shape:getPoints())	
 		end
+		--]]
 		
-		--love.graphics.polygon("line", self.shape:getPoints())	
 		love.graphics.setColor(255,255,255,255)
 	end
 	

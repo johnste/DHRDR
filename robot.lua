@@ -7,6 +7,8 @@ M = {
 	image = nil,
 	particleSystem = nil,
 	weld = false,
+	name = "robot",
+	lastShot = nil
 }
 
 function M:new(data)
@@ -19,60 +21,62 @@ function M:new(data)
 			o[k] = v
 		end		
 	end	
-
-	o.body = body:new{
-		owner = o, x = o.x, y = o.y, scale = o.scale or 1,
-		fixtures = {
-			{width = 50, height = 20, group = {-1}, image = "robotbody", density = 5}
-		}
-	}
 	
 	local spread = 25
 	
-	o.wheel1 = body:new{
-		owner = o, x = o.x - spread, y = o.y + 5, scale = o.scale or 1,
-		fixtures = {
-			{shape = "circle", radius = 17, group = {-1}, image = "robotwheel", friction = 2}
-		}
-	}
-	
-	o.wheel2 = body:new{
-		owner = o, x = o.x + spread, y = o.y +5 , scale = o.scale or 1,
-		fixtures = {
-			{shape = "circle", radius = 17, group = {-1}, image = "robotwheel", friction = 2}
-		}
-	}
-	
-
-	
+	o.objects = body:new({		
+		bodies = {
+			body = {
+				name = "robot body", x = o.x, y = o.y,
+				fixtures = {
+					{width = 50, height = 20, group = {-1}, image = "robotbody", density = 5}
+				}
+			},
+			wheel1 = {
+				name = "robot wheel 1", x = o.x - spread, y = o.y,
+				fixtures = {
+					{shape = "circle", radius = 20, group = {-1}, image = "robotwheel", friction = 2}
+				}
+			},
+			wheel2 = {
+				name = "robot wheel 2", x = o.x + spread, y = o.y,
+				fixtures = {
+					{shape = "circle", radius = 20, group = {-1}, image = "robotwheel", friction = 2}
+				}
+			},
+			sponge = {
+				name = "robot sponge", x = o.x, y = o.y - 16,
+				fixtures = {
+					sponge = {shape = "circle", radius = 7, group = {-1}, image = "egg", friction = 2}
+				}
+			}
+		}		
+	}, {
+		world = o.world, scale = o.scale or 1, owner = o,
+	})
+		
 	o.joint = joint:new{		
-		bodies = {o.body, o.wheel1}, scale = o.scale or 1,
-		x = o.x - spread, y = o.y+5,
-		torque = 9000,	motor = true, 
+		bodies = {o:getBody('body'), o:getBody('wheel1')}, scale = o.scale or 1,
+		x = o.x - spread, y = o.y,
+		torque = 7750,	motor = true, 
 	}
+	
+	
 	
 	o.joint2 = joint:new{
-		bodies = {o.body, o.wheel2}, scale = o.scale or 1,
-		x = o.x + spread, y = o.y+5,
-		torque = 9000,	motor = true, 	
+		bodies = {o:getBody('body'), o:getBody('wheel2')}, scale = o.scale or 1,
+		x = o.x + spread, y = o.y,
+		torque = 7750,	motor = true, 	
 	}
 	
-	
-	o.sponge = body:new{
-		owner = o, x = o.x, y = o.y - 16, scale = o.scale or 1,
-		fixtures = {
-			sponge = {shape = "circle", radius = 7, group = {-1}, image = "egg", friction = 2}
-		}
-	}
-	
-	o.sponge.body:setLinearDamping(0.2)
+	o:getBody('sponge'):setLinearDamping(0.6)	
 	
 	o.spongeJoint = joint:new{		
 		jointType = "rope",
-		bodies = {o.body, o.sponge}, scale = o.scale or 1,
-		x = o.x, y = o.y-10/love.physics.getMeter(),
+		bodies = {o:getBody('body'), o:getBody('sponge')}, scale = o.scale or 1,
+		x = o.x, y = o.y,
 		x2 = o.x, y2 = o.y-16,
-		maxLength = 380,
+		maxLength = 370,
 		collide = false, 		
 	}
 	
@@ -96,19 +100,19 @@ function M:new(data)
 	return o
 end
 
+
+
 function M:draw()
-	self.body:draw()
-	self.wheel1:draw()
-	self.wheel2:draw()
+	self.objects:draw()
 
 	
 	if(self.weld) then
 		love.graphics.draw(self.particleSystem, 0, 0)		
 	end
-	self.sponge:draw()	
 	
-	---[[
-	local x1,y1,x2,y2 = self.spongeJoint.joint:getAnchors() 
+	
+	
+	local x1,y1,x2,y2 = self.spongeJoint.joint:getAnchors() 	
 	love.graphics.setColor(0, 0, 0, 255)
 	love.graphics.setLineWidth(7)
 	love.graphics.line(x1,y1,x2,y2)
@@ -116,7 +120,8 @@ function M:draw()
 	love.graphics.setLineWidth(3)
 	love.graphics.line(x1,y1,x2,y2)
 	love.graphics.setColor(255, 255, 255, 255)	
-	--]]
+	
+	
 
 	
 	
@@ -151,18 +156,11 @@ function M:update(dt)
 	
 	self.particleSystem:update(dt)
 	
-	--[[
-	print("anc", self.spongeJoint.joint:getAnchors())
-	print("bdy", self.body.body:getPosition())
-	print("spg", self.sponge.body:getPosition())
-	print("-------------------------------------------------------------")
-	io.flush()
-	--]]
 	
 	
 	local dir = {
-		x = self.body.body:getX() - self.sponge.body:getX() - 100 * math.cos(self.body.body:getAngle() + math.tau/4),
-		y = self.body.body:getY() - self.sponge.body:getY() - 100 * math.abs(math.sin(self.body.body:getAngle() + math.tau/4))
+		x = self.objects.bodies.body.body:getX() - self.objects.bodies.sponge.body:getX() - 100 * math.cos(self.objects.bodies.body.body:getAngle() + math.tau/4),
+		y = self.objects.bodies.body.body:getY() - self.objects.bodies.sponge.body:getY() - 100 * math.abs(math.sin(self.objects.bodies.body.body:getAngle() + math.tau/4))
 	}
 	local length = math.sqrt(dir.x * dir.x + dir.y * dir.y)	
 	dir.x = dir.x / length
@@ -170,22 +168,22 @@ function M:update(dt)
 	
 	if self.weld and self.testJoint then
 		if(self.weldedBody and self.weldedBody:getType() == "dynamic") then
-			self.body.body:applyForce(dir.x * -1000 * length/1000, dir.y * -1000* length/1000)		
-			self.sponge.body:applyForce(dir.x * 600* length/800, dir.y * 600* length/500)
+			self.objects.bodies.body.body:applyForce(dir.x * -1000 * length/1000, dir.y * -1000* length/1000)		
+			self.objects.bodies.sponge.body:applyForce(dir.x * 600* length/800, dir.y * 600* length/500)
 		else
-			self.body.body:applyForce(dir.x * -3800 * length/700, dir.y * -3800* length/700)		
+			self.objects.bodies.body.body:applyForce(dir.x * -4800 * length/700, dir.y * -4800* length/700)		
 		end
 	else
-		self.sponge.body:applyForce(dir.x * 100, dir.y * 100)
+		self.objects.bodies.sponge.body:applyForce(dir.x * 100, dir.y * 100 )
 	end
 	
 	
 	
 	if self.createWeld and self.weld then
 		self.testJoint = love.physics.newWeldJoint(
-			self.sponge.body, self.createWeld:getBody(), 
-			self.sponge.body:getX(), 
-			self.sponge.body:getY(), 
+			self:getBody('sponge'), self.createWeld:getBody(), 
+			self:getBody('sponge'):getX(), 
+			self:getBody('sponge'):getY(), 
 			false)
 		self.weldedBody = self.createWeld:getBody()
 		self.createWeld = false
@@ -199,11 +197,11 @@ function M:update(dt)
 	end
 	
 	if self.weld then
-		self.particleSystem:setPosition(self.sponge.body:getX(), 
-			self.sponge.body:getY())
+		self.particleSystem:setPosition(self.objects.bodies.sponge.body:getX(), 
+			self.objects.bodies.sponge.body:getY())
 		self.particleSystem:start()
 	end
-
+	
 end
 
 function M:keypressed(key, unicode)
@@ -216,24 +214,26 @@ end
 
 function M:mousepressed(cx, cy, button)
 	
-	if button == "l" then
-		local x1, y1 = self.body.body:getPosition()
+	if button == "l" and ((not self.lastShot) or love.timer.getTime() - self.lastShot > 0.5) then
+		self.lastShot = love.timer.getTime()
+		local x1, y1 = self.objects.bodies.body.body:getPosition()
 		--self.sponge.body:setPosition(x1,y1 - 16)
 		
 		local dir = {
-			x = cx - self.sponge.body:getX(),
-			y = cy - self.sponge.body:getY()
+			x = cx - self.objects.bodies.sponge.body:getX(),
+			y = cy - self.objects.bodies.sponge.body:getY()
 		}
 		local length = math.sqrt(dir.x * dir.x + dir.y * dir.y)		
 		dir.x = dir.x / length
 		dir.y = dir.y / length
 		
-		if (self.weldedBody and self.weldedBody:getType() == "dynamic" and self.testJoint) then
-			self.sponge.body:applyLinearImpulse(dir.x * 150, dir.y * 150)
+		if (self.testJoint and self.weldedBody and self.weldedBody:getType() == "dynamic") then
+			self.objects.bodies.sponge.body:applyLinearImpulse(dir.x * 150, dir.y * 150)
 		else
-			self.sponge.body:applyLinearImpulse(dir.x * 50, dir.y * 50)
+			self.objects.bodies.sponge.body:applyLinearImpulse(dir.x * 50, dir.y * 50)
 		end
 		self.weld = true
+
 		love.audio.rewind(sounds.fire)
 		love.audio.play(sounds.fire)
 		
@@ -251,12 +251,25 @@ function M:mousereleased(x, y, button)
 	end
 end
 
-function M:collide(active, myFixture, theirFixture, contact, theirOwner)
-	if (active and not theirFixture:isSensor() and myFixture == self.sponge.fixtures.sponge.fixture and theirOwner ~= self and not self.testJoint) then
+function M:collide(active, myFixture, theirFixture, contact, theirOwner)		
+	if (active and not theirFixture:isSensor() and myFixture == self:getFixture('sponge','sponge') and theirOwner ~= self and not self.testJoint) then
 		self.createWeld = theirFixture		
 	end
 	
 end
 
+function M:destroy()
+	self.objects:destroy()
+
+
+end
+
+function M:getBody(body)
+	return self.objects:getBody(body)
+end
+
+function M:getFixture(body, fixture)
+	return self.objects:getFixture(body, fixture)
+end
 
 return M

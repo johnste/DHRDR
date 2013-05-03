@@ -28,7 +28,6 @@ function M:new(data)
 		height = 60,
 	}
 	
-	
 	love.audio.play(sounds.music)
 	return o
 end

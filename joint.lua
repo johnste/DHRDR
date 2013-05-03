@@ -29,7 +29,7 @@ function M:new(data)
 	end
 
 	if (o.jointType == "revolute") then
-		o.joint = love.physics.newRevoluteJoint(o.bodies[1].body, o.bodies[2].body, o.x, o.y)
+		o.joint = love.physics.newRevoluteJoint(o.bodies[1], o.bodies[2], o.x, o.y)
 		if (o.limits) then
 			o.joint:setLimits(o.limits[1], o.limits[2])
 			o.joint:enableLimit(true)
@@ -46,7 +46,7 @@ function M:new(data)
 	elseif (o.jointType == "rope") then
 		--o.joint = love.physics.newRopeJoint(o.bodies[1].body, o.bodies[2].body, o.x, o.y, o.x2, o.y2, o.maxLength, o.collide)
 		--o.joint = love.physics.newDistanceJoint(o.bodies[1].body, o.bodies[2].body, o.x, o.y, o.x2, o.y2, o.maxLength, o.collide)
-		o.joint = love.physics.newRopeJoint(o.bodies[1].body, o.bodies[2].body, o.x * love.physics.getMeter(), o.y * love.physics.getMeter(), o.x2 * love.physics.getMeter(), o.y2 * love.physics.getMeter(), o.maxLength, o.collide)
+		o.joint = love.physics.newRopeJoint(o.bodies[1], o.bodies[2], o.x * love.physics.getMeter(), o.y * love.physics.getMeter(), o.x2 * love.physics.getMeter(), o.y2 * love.physics.getMeter(), o.maxLength, o.collide)
 	end
 	
 	

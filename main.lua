@@ -10,6 +10,7 @@ files = {
 	camera = "camera.lua",	
 	level = "level.lua",
 	joint = "joint.lua",
+	prefabs = "prefabs.lua",
 	"main.lua",	
 	"utils.lua",
 }
@@ -51,19 +52,23 @@ function love.load()
 	files = love.filesystem.enumerate("sound")
 	for k, file in ipairs(files) do
 		sounds[string.sub(file, 0, string.find(file, "%.") - 1)] = love.audio.newSource("sound/" .. file, "static")				
+		sounds[string.sub(file, 0, string.find(file, "%.") - 1)]:setVolume(0.7)
 	end
 	sounds.engine:setLooping(true)
-	sounds.engine:setVolume(0.5)
+	sounds.engine:setVolume(0.2)
 	
 	sounds.music:setLooping(true)
 	sounds.music:setVolume(0.2)
 	
+	local font = love.graphics.newFont(18)
+	love.graphics.setFont(font)
 	
-	states.menu = menustate:new()
-	
+	states.menu = menustate:new()	
 	currentState = states.menu
+	states.play = playstate:new()
+	--currentState = states.play
 	
-	--states.menu = menustate:new()
+	
 end
 
 function love.update(dt)
@@ -93,8 +98,8 @@ function love.keypressed(key, unicode)
         love.event.quit()
     end
 	
-	--[[
-	if key == "r" then
+	---[[
+	if key == "f3" then
 		print(":> Force reload of all source files")
 		io.flush()
 		for n, f in pairs(files) do

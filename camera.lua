@@ -27,8 +27,8 @@ function M:set()
 	love.graphics.translate(self.offset.x, self.offset.y)
 	love.graphics.scale(1, 1)
 	if self.target then
-		self.x = -self.target.body.body:getX()
-		self.y = -self.target.body.body:getY()
+		self.x = -self.target.objects.bodies.body.body:getX()
+		self.y = -self.target.objects.bodies.body.body:getY()
 	end
 	
 	love.graphics.translate(self.x, self.y)
